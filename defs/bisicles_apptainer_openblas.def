@@ -13,8 +13,8 @@ From: ubuntu:24.04
     # SOURCE DESTINATION. SOURCE is always on the host. DESTINATION is by default in container
     # ADAPT!
     /home/alevroal/bisicles/Chombo /usr/local/build
-    ../configs/Chombo/Make.defs.openblas.local /usr/local/build/Chombo/lib/mk/Make.defs.local
-    ../configs/BISICLES/Make.defs.openblas.none /usr/local/build/Make.defs.none
+    configs/Chombo/Make.defs.openblas.local /usr/local/build/Chombo/lib/mk/Make.defs.local
+    configs/BISICLES/Make.defs.openblas.none /usr/local/build/Make.defs.none
     
 %environment
     export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
