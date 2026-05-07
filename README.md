@@ -13,7 +13,7 @@ You need to have Apptainer or Singularity installed.
 ## How to build a container
 On an HPC, load Singularity/Apptainer then type
 ```
-cd bisicles-container/defs
+cd bisicles-container
 apptainer build bisicles.sif defs/bisicles_apptainer_petsc.def
 ```
 or, on a local laptop if you encounter the error `FATAL: ...permission denied`,
