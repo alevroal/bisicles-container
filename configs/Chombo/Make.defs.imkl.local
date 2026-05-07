@@ -1,0 +1,30 @@
+makefiles+=Make.defs.local
+
+#default to MPI=TRUE,OPT=TRUE,DEBUG=FALSE 
+MPI=TRUE
+OPT=TRUE
+DEBUG=FALSE
+
+#this seems to be the Cray way
+PRECISION = DOUBLE
+CXX=g++
+FC=gfortran
+MPICXX=mpicxx
+USE_64=TRUE
+USE_FFTW=TRUE
+FFTW_DIR=
+
+cxxdbgflags    = -g -fPIC
+cxxoptflags    = -fPIC -O3 -mavx2  -ffast-math
+fdbgflags     =  -g -fPIC
+foptflags     = -fPIC -O3 -mavx2 -ffast-math -funroll-loops
+
+CH_CPP=$(CXX) -E -P
+
+MKL_LIBS=-L/usr/lib/x86_64-linux-gnu -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl
+
+USE_HDF=TRUE
+HDFLIBFLAGS=   -L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/     -lhdf5 -lz $(MKL_LIBS)
+HDFMPILIBFLAGS=-L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/     -lhdf5 -lz $(MKL_LIBS)
+HDFINCFLAGS=   -I/usr/include/hdf5/openmpi/
+HDFMPIINCFLAGS=-I/usr/include/hdf5/openmpi/

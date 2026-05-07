@@ -1,0 +1,5 @@
+PYTHON_INC=$(shell python3-config --includes)
+PYTHON_LIBS=$(shell python3-config --embed --ldflags)
+NETCDF_HOME=$(shell nc-config --prefix)
+NETCDF_INC=-I$(shell nc-config --includedir)
+NETCDF_LIBS=$(shell nc-config --flibs) $(shell nc-config --libs)

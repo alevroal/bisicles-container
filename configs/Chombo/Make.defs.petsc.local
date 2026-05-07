@@ -1,0 +1,27 @@
+makefiles+=Make.defs.local
+
+#default to MPI=TRUE,OPT=TRUE,DEBUG=FALSE 
+MPI=TRUE
+OPT=TRUE
+DEBUG=FALSE
+
+PRECISION = DOUBLE
+CXX=g++
+FC=gfortran
+MPICXX=mpicxx
+USE_64=TRUE
+USE_FFTW=TRUE
+FFTWDIR=/usr
+
+cxxdbgflags    = -g -fPIC
+cxxoptflags    = -fPIC -O3 -ffast-math
+fdbgflags     =  -g -fPIC
+foptflags     = -fPIC -O3 -ffast-math -funroll-loops
+
+CH_CPP=$(CXX) -E -P
+
+USE_HDF=TRUE
+HDFLIBFLAGS=   -L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/     -lhdf5 -lz
+HDFMPILIBFLAGS=-L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/     -lhdf5 -lz
+HDFINCFLAGS=   -I/usr/include/hdf5/openmpi/
+HDFMPIINCFLAGS=-I/usr/include/hdf5/openmpi/

@@ -1,0 +1,83 @@
+BootStrap: docker
+From: ubuntu:24.04
+
+%help
+    Build a portable environment for the BICICLES code
+
+%setup
+    # create directory to build chombo and other packages in the container
+    mkdir -p ${APPTAINER_ROOTFS}/usr/local/build
+
+%files
+    # copy files from host to the container prior to calling %post
+    # SOURCE DESTINATION. SOURCE is always on the host. DESTINATION is by default in container
+    # The following must point to a Chombo3 build on the host system!!!
+    /home/alevroal/bisicles/Chombo /usr/local/build
+    ../configs/Chombo/Make.defs.petsc.local /usr/local/build/Chombo/lib/mk/Make.defs.local
+    ../configs/BISICLES/Make.defs.none /usr/local/build/Make.defs.none
+    
+%environment
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    export BISICLES_HOME=/usr/local/build
+    
+%post
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update && apt-get upgrade -y
+
+    echo "> Setting timezone to UTC non-interactively"
+    ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+    apt-get install -y tzdata
+    dpkg-reconfigure --frontend noninteractive tzdata
+
+    apt-get install -y git vim perl csh python3 python3-dev wget file subversion cmake cmake-curses-gui automake apt-file
+    apt-get install -y gcc gfortran g++
+
+    # need to check if we need the same MPI as UM
+    apt-get install -y openmpi-bin openmpi-common
+    apt-get install -y libnetcdf-pnetcdf-dev libhdf5-openmpi-dev libnetcdf-c++4-dev libnetcdf-dev libnetcdff-dev
+
+    # avoid MKL licensing/prompts; use FFTW with OpenBLAS/LAPACK instead
+    apt-get install -y libfftw3-dev #libopenblas-dev liblapack-dev
+
+    ln -sf /usr/bin/python3 /usr/bin/python
+
+    export HDF5_LIBDIR=/usr/lib/x86_64-linux-gnu/hdf5/openmpi/
+    export HDF5_INCDIR=/usr/include/hdf5/openmpi/
+    export NETCDF_LIBDIR=/usr/lib/x86_64-linux-gnu/
+    export NETCDF_INCDIR=/usr/include
+    export PYTHONLIBS=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+
+    export BUILD_DIR=/usr/local/build
+    export BISICLES_HOME=$BUILD_DIR
+
+    mkdir -p $BUILD_DIR
+
+    echo "\n\nBuilding PETSc..."
+    cd $BUILD_DIR
+    git clone -b release https://gitlab.com/petsc/petsc.git petsc-src
+    mkdir -p $BUILD_DIR/petsc
+    cd $BUILD_DIR/petsc-src
+    ./configure --download-fblaslapack=yes --download-hypre=yes -with-x=0 --with-c++support=yes --with-mpi=yes --with-hypre=yes --prefix=$BUILD_DIR/petsc --with-c2html=0 --with-ssl=0
+    export PETSC_DIR=$BUILD_DIR/petsc
+    make all
+    make install
+
+    echo "\n\nBuilding chombo..."
+    cd $BUILD_DIR
+    # svn co https://anag-repo.lbl.gov/svn/Chombo/release/3.2 Chombo #requires an anag repository account
+    cd Chombo/lib
+    # Add line to clone Chombo Make.defs.local from github repo and move to Chombo/lib/mk dir
+    make all USE_PETSC=TRUE
+
+    echo "\n\nBuilding bisicles..."
+    cd $BUILD_DIR
+    git clone https://github.com/ggslc/bisicles-uob.git BISICLES
+    cd BISICLES/code/mk
+    cp $BUILD_DIR/Make.defs.none Make.defs.none
+    ln -sf Make.defs.none "Make.defs.$(uname -n)"
+    cd $BUILD_DIR/BISICLES/code/exec2D
+    # this assumes that BISICLES and Chombo are checkout in the same directory
+    make clean
+    make USE_PETSC=TRUE
